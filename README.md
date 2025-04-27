@@ -27,8 +27,10 @@ curl -sL https://raw.githubusercontent.com/huayi/dockerpull/refs/heads/main/inst
 ### 用法
 安装完成后，你可以直接在终端中使用 dockerpull 命令。例如：
 ```bash
-dockerpull xxx.proxy.xxx alpine:latest
+dockerpull alpine:latest xxx.proxy.abc
 ```
+可以修改`$HOME/dockerpull.evn`文件中的`MIRRORS="xxx.proxy.abc"`指定默认的镜像地址  
+dockerpull会自动识别镜像地址进行下载; 多个镜像地址可以使用空格或者英文逗号`,`分隔;
 
 > 免责声明：  
 本项目中的脚本和文档内容部分或全部由人工智能（AI）工具自动生成。  
