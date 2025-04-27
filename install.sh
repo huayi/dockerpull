@@ -1,27 +1,36 @@
-#!/bin/bash
-# install.sh：自动下载安装 dockerpull 脚本并安装到系统 PATH 中
+#!/usr/bin/env bash
+# install.sh：自动下载安装 dockerpull 脚本并安装到系统 PATH 中，
+# 并在用户主目录创建环境变量文件，默认填充 Docker 官方镜像源
 
-# 定义 dockerpull 脚本的 raw URL，请替换为你实际的地址
-DOCKERPULL_URL="https://raw.githubusercontent.com/huayi/dockerpull/refs/heads/main/dockerpull.sh"
+set -euo pipefail
 
-echo "正在下载安装脚本..."
-# 将脚本下载到临时目录
-curl -sL "$DOCKERPULL_URL" -o /tmp/dockerpull
+# 脚本下载 URL（可通过环境变量覆盖）
+: ${DOCKERPULL_URL:="https://raw.githubusercontent.com/huayi/dockerpull/main/dockerpull.sh"}
 
-if [ $? -ne 0 ]; then
-    echo "下载失败，请检查网络连接或 URL 是否正确。"
-    exit 1
-fi
+# 下载到临时文件
+TMPFILE=$(mktemp)
+echo "Downloading dockerpull from $DOCKERPULL_URL..."
+curl -fsSL "$DOCKERPULL_URL" -o "$TMPFILE"
 
-# 赋予可执行权限
-chmod +x /tmp/dockerpull
+# 安装到 /usr/local/bin
+chmod +x "$TMPFILE"
+echo "Installing to /usr/local/bin/dockerpull (requires sudo)..."
+sudo mv "$TMPFILE" /usr/local/bin/dockerpull
 
-# 移动到系统 PATH 中的目录（比如 /usr/local/bin），需要 sudo 权限
-echo "正在安装到 /usr/local/bin 目录..."
-sudo mv /tmp/dockerpull /usr/local/bin/dockerpull
+echo "dockerpull installed successfully."
 
-if [ $? -eq 0 ]; then
-    echo "安装成功！现在你可以直接使用 'dockerpull' 命令。"
+# 在用户主目录创建环境变量文件，若不存在则写入默认 Docker Hub
+ENV_FILE="$HOME/dockerpull.env"
+if [ ! -f "$ENV_FILE" ]; then
+    cat <<EOF > "$ENV_FILE"
+# dockerpull 镜像源列表文件
+# 支持空格或逗号分隔多个镜像源地址
+MIRRORS="docker.io"
+EOF
+    echo "Created default mirror list at $ENV_FILE with official Docker Hub."
 else
-    echo "安装失败，请检查你是否有足够的权限。"
+    echo "Mirror list file already exists at $ENV_FILE, skipping creation."
 fi
+
+echo "You can edit $ENV_FILE to add more registry mirrors, e.g.:"
+echo "  MIRRORS=\"docker.io registry.example.com,mirror.my.org\""
