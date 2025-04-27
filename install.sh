@@ -25,7 +25,7 @@ if [ ! -f "$ENV_FILE" ]; then
     cat <<EOF > "$ENV_FILE"
 # dockerpull 镜像源列表文件
 # 支持空格或逗号分隔多个镜像源地址
-MIRRORS="docker.io"
+MIRRORS=docker.io
 EOF
     echo "Created default mirror list at $ENV_FILE with official Docker Hub."
 else
